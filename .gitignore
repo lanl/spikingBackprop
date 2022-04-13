@@ -1,3 +1,19 @@
+archive/
+figures/
+weights_*/
+saved_*/
+.idea
+
+*.png
+*.pkl
+*.npz
+*.dat
+*.pdf
+*.pickle
+*.svg
+*.pgf
+*.asv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
