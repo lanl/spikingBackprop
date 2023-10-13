@@ -65,10 +65,9 @@ class BackpropNet(ConnectedGroups):
                 os.environ['SLURM'] = "1"
                 os.environ['PARTITION'] = "nahuku32"
                 os.environ['BOARD'] = "ncl-ext-ghrd-01"
-            do_probe = False
         else:
-            os.environ["KAPOHOBAY"] = "1"
-            do_probe = True
+            if self.on_kapohobay:
+                os.environ["KAPOHOBAY"] = "1"
 
         print("generating input data...")
         if num_trials <= 60000:
@@ -88,9 +87,6 @@ class BackpropNet(ConnectedGroups):
         print("initializing weights...")
         init_weight_matrix0, init_weight_matrix1 = weight_init(params, mode=self.weight_mode,
                                                                file=self.weight_file)
-
-        # (np.dot(input_data[0], init_weight_matrix0.T) + bias//64)>params['sfc_threshold']
-        # (np.dot((np.dot(np.ones(10), init_weight_matrix1)>0), init_weight_matrix1.T) + bias//64)>params['sfc_threshold']
 
         if self.do_train:
             plastic_connection_map = {
@@ -139,19 +135,15 @@ class BackpropNet(ConnectedGroups):
 
             use_reward_spikegen = True
             # We can do this with a neuron, but only one neuron is allowed to
-            # connect to a reinforcement channel. I.e. a neuron has to be gated on by the correct gating chain neurons, a
-            # direct connection from the gating chain doesn't work
+            # connect to a reinforcement channel. I.e. a neuron has to be gated on by the correct gating chain neurons,
+            # a direct connection from the gating chain doesn't work
             # If we use one neuron however, there are too many axons from that neuron.
             # Maybe it is possible to arrange the post neurons in a smart way to save axons? But for now, use spikegen
             if use_reward_spikegen:
-                # reward_times_per_phase = np.asarray([6, 8])  # 8 is apparently the W1 potentiation phase
-                # reward_times_per_phase = np.asarray([6, 8, 9])  # 8 is apparently the W1 potentiation phase
-                # TODO: Test without 9!
-                self.reward_times_per_phase = np.asarray([6, 8])  # 8 is apparently the W1 potentiation phase
-                # reward_times_per_phase = np.asarray([1])  # 8 is apparently the W1 potentiation phase TODO
+                self.reward_times_per_phase = np.asarray([6, 8])
 
                 phase_times = (np.sort((np.arange(len(input_data)) * num_gate))).tolist()
-                times_reward = np.concatenate([t + self.reward_times_per_phase for t in phase_times]).tolist()
+                # times_reward = np.concatenate([t + self.reward_times_per_phase for t in phase_times]).tolist()
 
                 spike_gen_reward = net.createSpikeGenProcess(1)
                 self.loihi_groups['reward'] = spike_gen_reward
