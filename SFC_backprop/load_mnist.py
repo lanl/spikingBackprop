@@ -5,7 +5,7 @@ import os
 import matplotlib.pyplot as plt
 import mnist
 import numpy as np
-import skimage
+import skimage.transform
 
 
 def rescale(data, sidelen=28):
@@ -30,8 +30,11 @@ def load_mnist(sidelen=28, crop=4, shuffle=True):
             mnist_train_labels = mnist_data['train_labels']
             mnist_test_labels = mnist_data['test_labels']
     except FileNotFoundError:
-        # mnist.datasets_url = 'https://github.com/golbin/TensorFlow-MNIST/raw/master/mnist/data/'
-        mnist.temporary_dir = lambda: os.path.join(os.path.dirname(__file__), 'mnist')
+        mnist.datasets_url = 'https://github.com/golbin/TensorFlow-MNIST/raw/master/mnist/data/'
+        # in case the webserver is down, you can also provide mnist data locally
+        # mnist.temporary_dir = lambda: os.path.join(os.path.dirname(__file__), 'mnist')
+
+        print('loading and processing mnist for the first time...')
 
         mnist_train_data = mnist.train_images()
         mnist_test_data = mnist.test_images()
@@ -46,6 +49,7 @@ def load_mnist(sidelen=28, crop=4, shuffle=True):
         mnist_test_data = rescale(mnist_test_data, sidelen) / 255.
         print('shape after rescaling', mnist_train_data.shape)
 
+        print('saving scaled and cropped dataset for future use...')
         np.savez_compressed('./mnist' + str(sidelen) + '_' + str(crop), train_data=mnist_train_data,
                             test_data=mnist_test_data,
                             train_labels=mnist_train_labels, test_labels=mnist_test_labels)
@@ -58,13 +62,6 @@ def load_mnist(sidelen=28, crop=4, shuffle=True):
     return mnist_train_data, mnist_test_data, mnist_train_labels, mnist_test_labels
 
 if __name__ == '__main__':
-    # images = mnist.train_images()
-    # example_im = skimage.transform.resize(images[0,:,:] * -1 + 256, 10*np.asarray(images[0,:,:].shape, anti_aliasing=False)
-    # plt.figure()
-    # plt.imshow(example_im, cmap='gray')
-
-    # example_im_ori = images[0, :, :] * -1 + 256
-    # plt.imshow(example_im_ori, cmap='gray')
 
     sidelen = 10
     mnist_train_data, mnist_test_data, mnist_train_labels, mnist_test_labels = load_mnist(sidelen=sidelen, crop=4)

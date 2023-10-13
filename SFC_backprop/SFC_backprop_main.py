@@ -27,6 +27,8 @@ from SFC_backprop.backprop_network import BackpropNet
 try:
     os.environ['SLURM']
     params['on_kapohobay'] = False
+    os.environ['PARTITION'] = "nahuku32"
+    os.environ['BOARD'] = "ncl-ext-ghrd-01"
 except:
     print('SLURM not set. Running on Kapohobay!')
     os.environ['KAPOHOBAY'] = '1'
