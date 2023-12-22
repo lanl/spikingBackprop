@@ -43,11 +43,17 @@ def validate_inference_activity(bp_sfc, labels=None, inp=None, do_plots=True):
 
     try:
         in_vec = bp_sfc.get_activity(in_name, phase_in)
-        hid_vec = bp_sfc.get_activity(hid_name, phase_hid)
-
-    except:
+    except KeyError as e:
+        print(e)
         if inp is not None:
             in_vec = inp
+        else:
+            raise Exception('no input spikes provided')
+
+    try:
+        hid_vec = bp_sfc.get_activity(hid_name, phase_hid)
+    except KeyError as e:
+        print(e)
 
     try:
         out_vec = bp_sfc.get_activity(out_name, phase_out)
@@ -68,36 +74,39 @@ def validate_inference_activity(bp_sfc, labels=None, inp=None, do_plots=True):
         hid_calc = round(np.dot(in_vec, W1.T[np.newaxis, :, :])[:, 0, :])
         out_calc_calc = round(np.dot(hid_calc, W2.T[np.newaxis, :, :])[:, 0, :])
 
-    try:
-        out_calc = round(np.dot(hid_vec, W2.T[np.newaxis, :, :])[:, 0, :])
-    except:
-        pass
+        try:
+            out_calc = round(np.dot(hid_vec, W2.T[np.newaxis, :, :])[:, 0, :])
+        except KeyError:
+            pass
 
-    if do_plots:
+        try:
+            if do_plots:
+                fig, axs = plt.subplots(num_out, 1)
+                if num_out == 1:
+                    axs = [axs]
+                for i, ax in enumerate(axs):
+                    ax.plot(out_vec[:, i])
+                    ax.plot(out_calc[:, i])
+                    # ax.plot(out_calc_calc[:, i])
+                    ax.plot(tgt_vec[:, i])
+                plt.legend(['out',  # 'calc',
+                            'calc',  # 'calc_calc',
+                            'tgt'])
 
-        fig, axs = plt.subplots(num_out, 1)
-        if num_out == 1:
-            axs = [axs]
-        for i, ax in enumerate(axs):
-            ax.plot(out_vec[:, i])
-            ax.plot(out_calc[:, i])
-            # ax.plot(out_calc_calc[:, i])
-            ax.plot(tgt_vec[:, i])
-        plt.legend(['out',  # 'calc',
-                    'calc',  # 'calc_calc',
-                    'tgt'])
+                fig, axs = plt.subplots(num_out, 1)
+                if num_out == 1:
+                    axs = [axs]
+                for i, ax in enumerate(axs):
+                    norm_out_calc_calc = out_calc_calc[:, i] - np.min(out_calc_calc[:, i])
+                    norm_out_calc_calc = norm_out_calc_calc / np.max(norm_out_calc_calc)
+                    ax.plot(0.4 < norm_out_calc_calc)
+                    ax.plot(tgt_vec[:, i])
+                    # print('classification calc_calc', i, ': ',   np.sum((0.3 < norm_out_calc_calc) == tgt_vec[:, i]))
+                    print('correct output', i, ': ', np.sum(out_vec[:, i] == tgt_vec[:, i]))
+                plt.legend(['calc_calc_round', 'tgt'])
 
-        fig, axs = plt.subplots(num_out, 1)
-        if num_out == 1:
-            axs = [axs]
-        for i, ax in enumerate(axs):
-            norm_out_calc_calc = out_calc_calc[:, i] - np.min(out_calc_calc[:, i])
-            norm_out_calc_calc = norm_out_calc_calc / np.max(norm_out_calc_calc)
-            ax.plot(0.4 < norm_out_calc_calc)
-            ax.plot(tgt_vec[:, i])
-            # print('classification calc_calc', i, ': ',   np.sum((0.3 < norm_out_calc_calc) == tgt_vec[:, i]))
-            print('correct output', i, ': ', np.sum(out_vec[:, i] == tgt_vec[:, i]))
-        plt.legend(['calc_calc_round', 'tgt'])
+        except NameError:
+            pass
 
     try:
         cr_calc_calc = np.sum(np.argmax(tgt_vec, axis=1) == np.argmax(out_calc_calc, axis=1)) / len(tgt_vec)
