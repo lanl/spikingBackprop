@@ -74,7 +74,7 @@ bp_sfc.save_results()
 bp_sfc.validate_inference_activity_calc()
 
 # input_data, output_data = generate_input_data(10000, input_data=dataset, add_bias=False)
-validate_inference_activity(bp_sfc, labels=bp_sfc.output_data, do_plots=False)
+# validate_inference_activity(bp_sfc, labels=bp_sfc.output_data, do_plots=False)
 
 # bp_sfc.load_spikes('./saved_spikes/spikes_20210405_1611.npz')
 
