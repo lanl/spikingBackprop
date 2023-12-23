@@ -76,7 +76,7 @@ def validate_inference_activity(bp_sfc, labels=None, inp=None, do_plots=True):
 
         try:
             out_calc = round(np.dot(hid_vec, W2.T[np.newaxis, :, :])[:, 0, :])
-        except KeyError:
+        except:
             pass
 
         try:
