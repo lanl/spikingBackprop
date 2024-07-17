@@ -27,12 +27,44 @@ loihi_weight_exp = 0
 
 dataset = 'MNIST20'  # To speed up the simulation and for debugging, choose 'MNIST10',
 # but the accuracy will be lower (around 90%)
+dataset = 'FMNIST28'
+
+# input_threshold = 0.5
+# 55000/60000 - acc: 0.7344 - loss: 0.03720744148829766
+# train_acc:  0.7318833333333333
+# input data:  FMNIST28_test
+# val_acc: 0.7343
+# val_acc_argmax: 0.7686
+# val_acc_argmax_out: 0.7985
+
+# input_threshold = 0.4
+# 55000/60000 - acc: 0.6472 - loss: 0.04642928585717144
+# train_acc:  0.63895
+# input data:  FMNIST28_test
+# val_acc: 0.6436
+# val_acc_argmax: 0.6726
+# val_acc_argmax_out: 0.6998
+
+input_threshold = 0.6
+# 55000/60000 - acc: 0.7304 - loss: 0.03650730146029206
+# train_acc:  0.7303166666666666
+# input data:  FMNIST28_test
+# val_acc: 0.7146
+# val_acc_argmax: 0.7582
+# val_acc_argmax_out: 0.7901
+
 
 if dataset == 'MNIST20':
     num_pix = 20
     num_in = num_pix ** 2
 elif dataset == 'MNIST10':
     num_pix = 10
+    num_in = num_pix ** 2
+elif dataset == 'MNIST28':
+    num_pix = 28
+    num_in = num_pix ** 2
+elif dataset == 'FMNIST28':
+    num_pix = 28
     num_in = num_pix ** 2
 else:
     raise Exception('dataset not defined')
@@ -67,7 +99,7 @@ num_trials = 60000
 
 num_plots = 10
 
-input_all, target_all = generate_input_data(num_trials, input_data=dataset, add_bias=False)
+input_all, target_all = generate_input_data(num_trials, input_data=dataset, add_bias=False, threshold=input_threshold)
 
 weight_max = loihi_weight_max * (2 ** loihi_weight_exp)
 weight_min = -weight_max
@@ -165,6 +197,7 @@ for ep in range(num_epochs):
 
     correct = 0
     cr_argmax = 0
+    cr_argmax_out = 0
     log_correct = []
     log_correct_argmax = []
     for i in range(10000):
@@ -182,15 +215,18 @@ for ep in range(num_epochs):
             axs[i - 10000 + num_plots, 1].plot(target, label='tgt')
 
         correct += (out_r == target).all()
-        log_correct += [correct]
+        log_correct += [(out_r == target).all()]
 
+        cr_argmax_out += np.sum(np.argmax(target, axis=0) == np.argmax(out, axis=0))
         cr_argmax += np.sum(np.argmax(target, axis=0) == np.argmax(out_r, axis=0))
-        log_correct_argmax += [cr_argmax]
+        log_correct_argmax += [np.sum(np.argmax(target, axis=0) == np.argmax(out_r, axis=0))]
 
-    print('val_acc:', (log_correct[-1] - log_correct[0]) / 10000)
-    print('val_acc_argmax:', (log_correct_argmax[-1] - log_correct_argmax[0]) / 10000)
 
-    log_val_acc.append((log_correct[-1] - log_correct[0]) / 10000)
+    print('val_acc:', correct / 10000)
+    print('val_acc_argmax:', cr_argmax / 10000)
+    print('val_acc_argmax_out:', cr_argmax_out / 10000)
+
+    log_val_acc.append(correct / 10000)
 
     if num_plots > 0:
         plt.legend()

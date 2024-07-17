@@ -14,7 +14,7 @@ from loihi_tools.weight_tools import calculate_mant_exp
 params = {}
 
 params['num_neurons'] = 1
-params['num_trials'] = 60000 * 2  # 120000 #120000  # 11  # 21
+params['num_trials'] = 60000 * 2  # we can do 2 epochs in one run, to save setup time
 
 params['num_populations'] = {}
 params['num_populations']['hid'] = 400  # 400 #400  # 400

@@ -1,5 +1,5 @@
-# sBP
-Spiking backprop on Intel's research chip Loihi with gated synfire chain.
+# nBP
+Neuromorphic backprop on Intel's research chip Loihi with gated synfire chain.
 
 This is the code used in the following publication:
 Renner, A., Sheldon, F., Zlotnik, A., Tao, L., & Sornborger, A. (2021). 

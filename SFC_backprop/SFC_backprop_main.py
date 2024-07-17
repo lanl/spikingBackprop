@@ -35,13 +35,16 @@ except:
     params['on_kapohobay'] = True
 
 weight_file = None
-weight_mode = 'rand_He'  # 'rand_He'  # 'restore'  # 'rand_He'
+weight_mode = 'rand_He'  # 'rand_He'  # 'restore'
 
 do_probe_energy = False
 do_train = True
 do_plots = False
 # dataset = 'MNIST20'
-dataset = 'MNIST10'
+# dataset = 'MNIST10'
+# dataset = 'MNIST28'
+dataset = 'FMNIST28'
+
 
 if do_train:
     params['dataset'] = dataset
@@ -56,8 +59,9 @@ if do_probe_energy:
     probe_mode = 0
 
 # seed = 42
-seed = np.random.randint(0, 10000)
+seed = np.random.randint(0, 10000)  # the seed needs to be different in each epoch
 np.random.seed(seed)
+print('seed:', seed)
 
 params['seed'] = seed
 params['do_train'] = do_train
