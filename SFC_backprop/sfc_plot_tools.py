@@ -41,13 +41,13 @@ def validate_inference_activity(bp_sfc, labels=None, inp=None, do_plots=True):
     num_hid = bp_sfc.params['num_populations']['hid']
     num_out = bp_sfc.params['num_populations']['out']
 
-    try:
-        in_vec = bp_sfc.get_activity(in_name, phase_in)
-    except KeyError as e:
-        print(e)
-        if inp is not None:
-            in_vec = inp
-        else:
+    if inp is not None:
+        in_vec = inp
+    else:
+        try:
+            in_vec = bp_sfc.get_activity(in_name, phase_in)
+        except Exception as e:
+            print(e)
             raise Exception('no input spikes provided')
 
     try:
