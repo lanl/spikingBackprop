@@ -7,14 +7,21 @@ num_neurons is the number of neurons per population
 num_layers is the number of unique populations
 num_populations is the number of parallel populations, e.g. if you have 4 inputs x1,x2,x3,x4, then this is 4.
 """
+import warnings
 
-from SFC_backprop.loihi_groups import create_loihi_neuron, create_loihi_synapse, create_loihi_spikegen
+try:
+    from SFC_backprop.loihi_groups import create_loihi_neuron, create_loihi_synapse, create_loihi_spikegen
+except Exception as e:
+    warnings.warn("Could not import nxsdk. That's ok if you just want to plot something. Error: " + str(e))
+    create_loihi_neuron, create_loihi_synapse, create_loihi_spikegen = None, None, None
+
 from loihi_tools.weight_tools import calculate_mant_exp
 
 params = {}
 
 params['num_neurons'] = 1
 params['num_trials'] = 60000 * 2  # we can do 2 epochs in one run, to save setup time
+# (new shuffled training data is generated for each epoch)
 
 params['num_populations'] = {}
 params['num_populations']['hid'] = 400  # 400 #400  # 400

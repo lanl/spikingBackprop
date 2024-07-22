@@ -84,6 +84,8 @@ def generate_input_data(num_trials, input_data='MNIST10', add_bias=False, thresh
                 mnist_train_labels = np.concatenate((mnist_train_labels, mnist_train_labels2))
 
         train_input = np.round(mnist_train_data[0:num_trials] * 256, 2)
+        # train_input = ((10**(-6) + np.mean(mnist_train_data, axis=0)) < mnist_train_data)
+
         train_output = np.zeros((num_trials, 10))
         for i, l in enumerate(mnist_train_labels[0:num_trials]):
             train_output[i, l] = 1
@@ -91,6 +93,8 @@ def generate_input_data(num_trials, input_data='MNIST10', add_bias=False, thresh
         assert num_trials <= 10000, 'test set only has 10000 samples'
         mnist_train_data, mnist_test_data, mnist_train_labels, mnist_test_labels = load_fmnist(sidelen=28, crop=0)
         train_input = np.round(mnist_test_data[0:num_trials] * 256, 2)
+        # train_input = ((10 ** (-6) + np.mean(mnist_train_data, axis=0)) < mnist_test_data)
+
         train_output = np.zeros((num_trials, 10))
         for i, l in enumerate(mnist_test_labels[0:num_trials]):
             train_output[i, l] = 1

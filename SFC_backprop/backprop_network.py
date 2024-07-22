@@ -40,6 +40,10 @@ class BackpropNet(ConnectedGroups):
         self.weight_mode = params['weight_mode']
         self.weight_file = params['weight_file']
         self.dataset = params['dataset']
+        try:
+            self.input_binary_threshold = params['input_binary_threshold']
+        except KeyError:
+            self.input_binary_threshold = 0.5
 
         if self.do_train:
             topology = topology_learn
@@ -70,10 +74,13 @@ class BackpropNet(ConnectedGroups):
                 os.environ["KAPOHOBAY"] = "1"
 
         print("generating input data...")
+
         if num_trials <= 60000:
-            input_data, output_data = generate_input_data(num_trials, input_data=self.dataset, add_bias=False)
+            input_data, output_data = generate_input_data(num_trials, input_data=self.dataset,
+                                                          add_bias=False, threshold=self.input_binary_threshold)
         else:
-            input_data, output_data = generate_input_data(60000, input_data=self.dataset, add_bias=False)
+            input_data, output_data = generate_input_data(60000, input_data=self.dataset,
+                                                          add_bias=False, threshold=self.input_binary_threshold)
 
         self.input_data = input_data
         self.output_data = output_data
@@ -205,7 +212,7 @@ class BackpropNet(ConnectedGroups):
             weight_tstart = 2 ** 22
             spike_tstart = 2 ** 22
         elif probe_mode == 1:
-            # probe only weight (loop) every 30000
+            # probe only weight (loop) every 30000 (for training)
             self.monitor_weights = [w for w in self.loihi_connections_plastic if ('_p' in w) and not ('copy' in w)]
             weight_dt = num_gate * 30000
             weight_tstart = num_gate * 30000 - 1

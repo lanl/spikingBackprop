@@ -99,3 +99,4 @@ if __name__ == '__main__':
     mnist_train_data, mnist_test_data, mnist_train_labels, mnist_test_labels = load_mnist(sidelen=sidelen, crop=4)
     example_im_ori = np.reshape(mnist_train_data[0, :] * -1 + 256, (sidelen, sidelen))
     plt.imshow(example_im_ori, cmap='gray')
+    plt.show()

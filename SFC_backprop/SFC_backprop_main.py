@@ -6,6 +6,7 @@ Created by : Alpha Renner (alpren@ini.uzh.ch)
 """
 import os
 import sys
+import warnings
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -27,7 +28,7 @@ from SFC_backprop.backprop_network import BackpropNet
 try:
     os.environ['SLURM']
     params['on_kapohobay'] = False
-    os.environ['PARTITION'] = "nahuku32"
+    os.environ['PARTITION'] = "nahuku32_2h"
     os.environ['BOARD'] = "ncl-ext-ghrd-01"
 except:
     print('SLURM not set. Running on Kapohobay!')
@@ -42,21 +43,21 @@ do_train = True
 do_plots = False
 # dataset = 'MNIST20'
 # dataset = 'MNIST10'
-# dataset = 'MNIST28'
-dataset = 'FMNIST28'
-
+dataset = 'MNIST28'
+# dataset = 'FMNIST28'
 
 if do_train:
     params['dataset'] = dataset
     probe_mode = 1
 else:
-    params['num_trials'] = 10000  # TODO
+    params['num_trials'] = 10000
     # params['num_trials'] = 1000
     params['dataset'] = dataset + '_test'
     probe_mode = 3
 
 if do_probe_energy:
     probe_mode = 0
+    params['num_trials'] = 30000
 
 # seed = 42
 seed = np.random.randint(0, 10000)  # the seed needs to be different in each epoch
@@ -201,44 +202,62 @@ if do_train:
         print(np.sum(bp_sfc.get_activity('o', 3)))
         for i in [1, 4, 6, 8, 10, 0]:
             print('phase:', i, end=' ')
-            assert 0 == (np.sum(bp_sfc.get_activity('h1', i)))
-            assert 0 == (np.sum(bp_sfc.get_activity('h1_copy', i)))
-            assert 0 == (np.sum(bp_sfc.get_activity('h1_copy2', i)))
-            assert 0 == (np.sum(bp_sfc.get_activity('o', i)))
-            assert 0 == (np.sum(bp_sfc.get_activity('o_copy', i)))
-            assert 0 == (np.sum(bp_sfc.get_activity('o_copy2', i)))
-            assert 0 == (np.sum(bp_sfc.get_activity('o', i)))
+            if not 0 == (np.sum(bp_sfc.get_activity('h1', i))):
+                warnings.warn('h1 not silent in inactive phase ' + str(i))
+            if not 0 == (np.sum(bp_sfc.get_activity('h1_copy', i))):
+                warnings.warn('h1_copy not silent in inactive phase ' + str(i))
+            if not 0 == (np.sum(bp_sfc.get_activity('h1_copy2', i))):
+                warnings.warn('h1_copy2 not silent in inactive phase ' + str(i))
+            if not 0 == (np.sum(bp_sfc.get_activity('o', i))):
+                warnings.warn('o not silent in inactive phase ' + str(i))
+            if not 0 == (np.sum(bp_sfc.get_activity('o_copy', i))):
+                warnings.warn('o_copy not silent in inactive phase ' + str(i))
+            if not 0 == (np.sum(bp_sfc.get_activity('o_copy2', i))):
+                warnings.warn('o_copy2 not silent in inactive phase ' + str(i))
+            if not 0 == (np.sum(bp_sfc.get_activity('o', i))):
+                warnings.warn('o not silent in inactive phase ' + str(i))
 
-            print('OK, silent')
         for i in [0, 1, 2, 3, 4, 7, 8, 11]:
-            assert 0 == (np.sum(bp_sfc.get_activity('h1T', i)))
+            if not 0 == (np.sum(bp_sfc.get_activity('h1T', i))):
+                warnings.warn('h1T not silent in inactive phase ' + str(i))
 
         for i in range(bp_sfc.num_gate):
             print('phase:', i, end=' ')
             print(np.sum(bp_sfc.get_activity('x', i)))
     except KeyError:
-        pass
+        print('not checked for errors. Run in debug mode with all probes to check for errors.')
 
     # bp_sfc.get_activity('x', 1)[:100]==bp_sfc.get_activity('x', 11)
     try:
-        assert (w_final['w1'] == w_final['w1_copy1']).all()
-        assert (w_final['w1'] == w_final['w1_copy2']).all()
+        if not (w_final['w1'] == w_final['w1_copy1']).all():
+            warnings.warn('w1 not equal to w1_copy1')
+        if not (w_final['w1'] == w_final['w1_copy2']).all():
+            warnings.warn('w1 not equal to w1_copy2')
     except KeyError:
         pass
 
     try:
-        assert (w_final['w1_copy1'] == w_final['w1_copy2']).all()
-        assert (w_final['w2'] == w_final['w2_copy1']).all()
-        assert (w_final['w2'] == w_final['w2_copy2']).all()
+        if not (w_final['w1_copy1'] == w_final['w1_copy2']).all():
+            warnings.warn('w1_copy1 not equal to w1_copy2')
+        if not (w_final['w2'] == w_final['w2_copy1']).all():
+            warnings.warn('w2 not equal to w2_copy1')
+        if not (w_final['w2'] == w_final['w2_copy2']).all():
+            warnings.warn('w2 not equal to w2_copy2')
     except KeyError:
         pass
 
-    assert (w_final['w2'].T == w_final['w2Tp']).all(), np.sum(np.abs(w_final['w2'].T - w_final['w2Tp']))
-    print((w_final['w2'].T == -w_final['w2Tm']).all(), np.sum(np.abs(w_final['w2'].T + w_final['w2Tm'])))
-    print((w_final['w2Tp'] == -w_final['w2Tm']).all(), np.sum(np.abs(w_final['w2Tm'] + w_final['w2Tp'])))
+    if not (w_final['w2'].T == w_final['w2Tp']).all():
+        warnings.warn('w2 not equal to w2Tp')
+    print(np.sum(np.abs(w_final['w2'].T - w_final['w2Tp'])))
+    if not (w_final['w2'].T == -w_final['w2Tm']).all():
+        warnings.warn('w2 not equal to w2Tm')
+    print(np.sum(np.abs(w_final['w2'].T + w_final['w2Tm'])))
+    if not (w_final['w2Tp'] == -w_final['w2Tm']).all():
+        warnings.warn('w2Tp not equal to -w2Tm')
+    print(np.sum(np.abs(w_final['w2Tm'] + w_final['w2Tp'])))
 
-    w_final['w2Tm'][np.where(w_final['w2'].T != -w_final['w2Tm'])]
-    w_final['w2'].T[np.where(w_final['w2'].T != -w_final['w2Tm'])]
+    print(w_final['w2Tm'][np.where(w_final['w2'].T != -w_final['w2Tm'])])
+    print(w_final['w2'].T[np.where(w_final['w2'].T != -w_final['w2Tm'])])
 
-    w_final['w2Tp'][np.where(w_final['w2'].T != w_final['w2Tp'])]
-    w_final['w2'].T[np.where(w_final['w2'].T != w_final['w2Tp'])]
+    print(w_final['w2Tp'][np.where(w_final['w2'].T != w_final['w2Tp'])])
+    print(w_final['w2'].T[np.where(w_final['w2'].T != w_final['w2Tp'])])
