@@ -29,7 +29,8 @@ try:
     os.environ['SLURM']
     params['on_kapohobay'] = False
     os.environ['PARTITION'] = "nahuku32_2h"
-    os.environ['BOARD'] = "ncl-ext-ghrd-01"
+    # os.environ['BOARD'] = "ncl-ext-ghrd-01"
+    os.environ['BOARD'] = "ncl-ext-ghrd-02"  # this is automatically set to 01 for power measurements
 except:
     print('SLURM not set. Running on Kapohobay!')
     os.environ['KAPOHOBAY'] = '1'
@@ -41,10 +42,11 @@ weight_mode = 'rand_He'  # 'rand_He'  # 'restore'
 do_probe_energy = False
 do_train = True
 do_plots = False
+do_debug = False
 # dataset = 'MNIST20'
 # dataset = 'MNIST10'
-dataset = 'MNIST28'
-# dataset = 'FMNIST28'
+# dataset = 'MNIST28'
+dataset = 'FMNIST28'
 
 if do_train:
     params['dataset'] = dataset
@@ -57,10 +59,15 @@ else:
 
 if do_probe_energy:
     probe_mode = 0
-    params['num_trials'] = 30000
+    params['num_trials'] = 10000
 
-# seed = 42
-seed = np.random.randint(0, 10000)  # the seed needs to be different in each epoch
+if do_debug:
+    probe_mode = 2
+    seed = 42
+    params['num_trials'] = 150
+else:
+    seed = np.random.randint(0, 10000)  # the seed needs to be different in each epoch
+
 np.random.seed(seed)
 print('seed:', seed)
 
@@ -74,9 +81,9 @@ bp_sfc = BackpropNet(params, debug=0)
 bp_sfc.setup_probes(probe_mode=probe_mode)
 
 bp_sfc.run()
-bp_sfc.save_results()
-
-bp_sfc.validate_inference_activity_calc()
+if not do_probe_energy: # when energy is probed, all other probes are disabled
+    bp_sfc.save_results()
+    bp_sfc.validate_inference_activity_calc()
 
 # input_data, output_data = generate_input_data(10000, input_data=dataset, add_bias=False)
 # validate_inference_activity(bp_sfc, labels=bp_sfc.output_data, do_plots=False)
@@ -196,7 +203,7 @@ if do_plots:
     matplotlib.rcParams['pgf.texsystem'] = 'pdflatex'
     plt.savefig('./rasterplot_annotated.svg')
 
-if do_train:
+if do_train and not do_probe_energy:
     try:
         print(np.sum(bp_sfc.get_activity('h1', 2)))
         print(np.sum(bp_sfc.get_activity('o', 3)))
