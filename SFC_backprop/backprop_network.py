@@ -14,7 +14,7 @@ import nxsdk.api.n2a as nx
 from SFC_backprop.input_data import generate_input_data
 from SFC_backprop.loihi_groups import calc_spiketimes_from_input_arr
 from SFC_backprop.network_topology_2layer import topology_inference, topology_learn
-from SFC_backprop.sfc_plot_tools import validate_inference_activity
+from SFC_backprop.simulation import inference_from_weights
 from SFC_backprop.synfire_chain import ConnectedGroups
 from SFC_backprop.weight_init import weight_init
 from loihi_tools.spikegenerators import add_spikes_to_spikegen
@@ -397,7 +397,7 @@ class BackpropNet(ConnectedGroups):
                     print('part done: ', part + 1, '/', str(num_parts))
                     # self.calc_weights()
                     self.save_results()
-                    self.validate_inference_activity_calc()
+                    self.accuracy_from_weights()
 
                     if (self.current_offset % (datasize * self.num_gate)) == 0:
                         self.generate_new_input_data(num_trials=datasize)
@@ -497,11 +497,11 @@ class BackpropNet(ConnectedGroups):
             spikes_loaded = {sp: d for sp, d in f.items()}
             self.spikes = spikes_loaded
 
-    def validate_inference_activity_calc(self):
+    def accuracy_from_weights(self):
         data = self.dataset.replace('_test', '')
         print('validation set:')
         input_data, output_data = generate_input_data(10000, input_data=data, add_bias=False)
-        validate_inference_activity(self, labels=output_data, inp=input_data, do_plots=False)
+        inference_from_weights(self, labels=output_data, inp=input_data)
         print('train set:')
         input_data, output_data = generate_input_data(20000, input_data=data, add_bias=False)
-        validate_inference_activity(self, labels=output_data, inp=input_data, do_plots=False)
+        inference_from_weights(self, labels=output_data, inp=input_data)

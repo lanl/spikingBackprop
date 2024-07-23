@@ -18,7 +18,6 @@ try:
 except:
     pass
 from SFC_backprop.network_parameters_2layer_MNIST import params
-from SFC_backprop.sfc_plot_tools import validate_inference_activity
 from SFC_backprop.backprop_network import BackpropNet
 
 # to reset Kapohobay run something like:
@@ -29,8 +28,7 @@ try:
     os.environ['SLURM']
     params['on_kapohobay'] = False
     os.environ['PARTITION'] = "nahuku32_2h"
-    # os.environ['BOARD'] = "ncl-ext-ghrd-01"
-    os.environ['BOARD'] = "ncl-ext-ghrd-02"  # this is automatically set to 01 for power measurements
+    os.environ['BOARD'] = "ncl-ext-ghrd-01"
 except:
     print('SLURM not set. Running on Kapohobay!')
     os.environ['KAPOHOBAY'] = '1'
@@ -64,7 +62,7 @@ if do_probe_energy:
 if do_debug:
     probe_mode = 2
     seed = 42
-    params['num_trials'] = 150
+    params['num_trials'] = 30000
 else:
     seed = np.random.randint(0, 10000)  # the seed needs to be different in each epoch
 
@@ -81,9 +79,9 @@ bp_sfc = BackpropNet(params, debug=0)
 bp_sfc.setup_probes(probe_mode=probe_mode)
 
 bp_sfc.run()
-if not do_probe_energy: # when energy is probed, all other probes are disabled
+if not do_probe_energy:  # when energy is probed, all other probes are disabled
     bp_sfc.save_results()
-    bp_sfc.validate_inference_activity_calc()
+    bp_sfc.accuracy_from_weights()
 
 # input_data, output_data = generate_input_data(10000, input_data=dataset, add_bias=False)
 # validate_inference_activity(bp_sfc, labels=bp_sfc.output_data, do_plots=False)
@@ -208,7 +206,7 @@ if do_train and not do_probe_energy:
         print(np.sum(bp_sfc.get_activity('h1', 2)))
         print(np.sum(bp_sfc.get_activity('o', 3)))
         for i in [1, 4, 6, 8, 10, 0]:
-            print('phase:', i, end=' ')
+            print('phase', i, end=': ')
             if not 0 == (np.sum(bp_sfc.get_activity('h1', i))):
                 warnings.warn('h1 not silent in inactive phase ' + str(i))
             if not 0 == (np.sum(bp_sfc.get_activity('h1_copy', i))):
@@ -229,8 +227,12 @@ if do_train and not do_probe_energy:
                 warnings.warn('h1T not silent in inactive phase ' + str(i))
 
         for i in range(bp_sfc.num_gate):
-            print('phase:', i, end=' ')
+            print('phase', i, end=': ')
             print(np.sum(bp_sfc.get_activity('x', i)))
+
+        for i in range(bp_sfc.num_gate):
+            print('phase', i, end=': ')
+            print(np.sum(bp_sfc.get_activity('h1', i)))
     except KeyError:
         print('not checked for errors. Run in debug mode with all probes to check for errors.')
 
@@ -240,8 +242,8 @@ if do_train and not do_probe_energy:
             warnings.warn('w1 not equal to w1_copy1')
         if not (w_final['w1'] == w_final['w1_copy2']).all():
             warnings.warn('w1 not equal to w1_copy2')
-    except KeyError:
-        pass
+    except KeyError as e:
+        print(e)
 
     try:
         if not (w_final['w1_copy1'] == w_final['w1_copy2']).all():
@@ -250,15 +252,17 @@ if do_train and not do_probe_energy:
             warnings.warn('w2 not equal to w2_copy1')
         if not (w_final['w2'] == w_final['w2_copy2']).all():
             warnings.warn('w2 not equal to w2_copy2')
-    except KeyError:
-        pass
+    except KeyError as e:
+        print(e)
 
     if not (w_final['w2'].T == w_final['w2Tp']).all():
         warnings.warn('w2 not equal to w2Tp')
     print(np.sum(np.abs(w_final['w2'].T - w_final['w2Tp'])))
+
     if not (w_final['w2'].T == -w_final['w2Tm']).all():
-        warnings.warn('w2 not equal to w2Tm')
+        warnings.warn('w2 not equal to -w2Tm')
     print(np.sum(np.abs(w_final['w2'].T + w_final['w2Tm'])))
+
     if not (w_final['w2Tp'] == -w_final['w2Tm']).all():
         warnings.warn('w2Tp not equal to -w2Tm')
     print(np.sum(np.abs(w_final['w2Tm'] + w_final['w2Tp'])))

@@ -109,7 +109,7 @@ num_neurons = params['num_neurons']
 
 binary_threshold = params['sfc_threshold'] // 2  # This is the value at which the neuron activity is rounded up
 assert binary_threshold == params['sfc_threshold'] / 2
-params['weight_p'] = params['sfc_threshold']  # This is the max weight
+# params['weight_p'] = params['sfc_threshold']  # This is the max weight
 
 w1e, exp1e = calculate_mant_exp(binary_threshold, verbose=0)
 params['weight_1e'] = binary_threshold + 2 ** exp1e  # This is done to avoid rounding errors
@@ -125,7 +125,7 @@ params['weight_gm05'] = binary_threshold  # +4 # - 2
 
 params['weight_gi'] = -254 * 2 ** 6  # TODO
 
-syn_delay = 0  # 1 means delay of 2 ...!?
+syn_delay = 0
 
 # identifier: (population connectivity, layer connectivity, connection probability)
 params['connection_types'] = {
@@ -262,35 +262,35 @@ params['connection_types'] = {
     'gi': {'pop_conn_type': '1:a',
            'syn': create_loihi_synapse,
            'params': {'weight': params['weight_gi'],
-                      'delay': syn_delay,  # 1 * sim_dt,  # 1 means no delay
+                      'delay': syn_delay,
                       'weight_factor': 1,
                       }
            },
     'gi2': {'pop_conn_type': '1:a',
             'syn': create_loihi_synapse,
             'params': {'weight': params['weight_gi'],
-                       'delay': syn_delay,  # 1 * sim_dt,  # 1 means no delay
+                       'delay': syn_delay,
                        'weight_factor': 1,
                        }
             },
     'gp05': {'pop_conn_type': '1:a',
              'syn': create_loihi_synapse,
              'params': {'weight': params['weight_gp05'],
-                        'delay': syn_delay,  # 1 * sim_dt,  # 1 means no delay
+                        'delay': syn_delay,
                         'weight_factor': 1,
                         }
              },
     'gm05': {'pop_conn_type': '1:a',
              'syn': create_loihi_synapse,
              'params': {'weight': params['weight_gm05'],
-                        'delay': syn_delay,  # 1 * sim_dt,  # 1 means no delay
+                        'delay': syn_delay,
                         'weight_factor': 1,
                         }
              },
     'g1m05': {'pop_conn_type': '1:1',
               'syn': create_loihi_synapse,
-              'params': {'weight': params['weight_gm05'],  # -8,
-                         'delay': syn_delay,  # 1 * sim_dt,  # 1 means no delay
+              'params': {'weight': params['weight_gm05'],
+                         'delay': syn_delay,
                          'weight_factor': 1,
                          }
               },
