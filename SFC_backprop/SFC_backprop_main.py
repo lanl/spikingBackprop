@@ -241,12 +241,18 @@ if do_train and not do_probe_energy:
             print('phase', i, end=': ')
             print(np.sum(bp_sfc.get_activity('h1', i)))
 
+        print('d:')
+        for i in range(bp_sfc.num_gate):
+            print('phase', i, end=': ')
+            print(np.sum(bp_sfc.get_activity('d-', i)))
+            print(np.sum(bp_sfc.get_activity('d+', i)))
+
         print('o:')
         for i in range(bp_sfc.num_gate):
             print('phase', i, end=': ')
-            print(np.sum(bp_sfc.get_activity('o', i)))
-            print(np.sum(bp_sfc.get_activity('o_copy', i)))
-            print(np.sum(bp_sfc.get_activity('o_copy2', i)))
+            print(np.sum(bp_sfc.get_activity('o', i)), end=': ')
+            print(np.sum(bp_sfc.get_activity('o_copy', i)), end=': ')
+            print(np.sum(bp_sfc.get_activity('o_copy2', i)), end=': ')
             print(np.sum(bp_sfc.get_activity('oT-', i)))
 
     except KeyError:
