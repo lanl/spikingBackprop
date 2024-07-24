@@ -205,7 +205,7 @@ if do_train and not do_probe_energy:
     try:
         print(np.sum(bp_sfc.get_activity('h1', 2)))
         print(np.sum(bp_sfc.get_activity('o', 3)))
-        for i in [1, 4, 6, 8, 10, 0]:
+        for i in [0, 1, 3, 4, 6, 8, 10]:
             print('phase', i, end=': ')
             if not 0 == (np.sum(bp_sfc.get_activity('h1', i))):
                 warnings.warn('h1 not silent in inactive phase ' + str(i))
@@ -213,6 +213,10 @@ if do_train and not do_probe_energy:
                 warnings.warn('h1_copy not silent in inactive phase ' + str(i))
             if not 0 == (np.sum(bp_sfc.get_activity('h1_copy2', i))):
                 warnings.warn('h1_copy2 not silent in inactive phase ' + str(i))
+        print('')
+
+        for i in [0, 1, 2, 4, 6, 7, 8, 10, 11]:
+            print('phase', i, end=': ')
             if not 0 == (np.sum(bp_sfc.get_activity('o', i))):
                 warnings.warn('o not silent in inactive phase ' + str(i))
             if not 0 == (np.sum(bp_sfc.get_activity('o_copy', i))):
@@ -221,6 +225,7 @@ if do_train and not do_probe_energy:
                 warnings.warn('o_copy2 not silent in inactive phase ' + str(i))
             if not 0 == (np.sum(bp_sfc.get_activity('o', i))):
                 warnings.warn('o not silent in inactive phase ' + str(i))
+        print('')
 
         for i in [0, 1, 2, 3, 4, 7, 8, 11]:
             if not 0 == (np.sum(bp_sfc.get_activity('h1T', i))):
@@ -230,9 +235,19 @@ if do_train and not do_probe_energy:
             print('phase', i, end=': ')
             print(np.sum(bp_sfc.get_activity('x', i)))
 
+        print('')
+
         for i in range(bp_sfc.num_gate):
             print('phase', i, end=': ')
             print(np.sum(bp_sfc.get_activity('h1', i)))
+
+        for i in range(bp_sfc.num_gate):
+            print('phase', i, end=': ')
+            print(np.sum(bp_sfc.get_activity('o', i)))
+
+        for i in range(bp_sfc.num_gate):
+            print('phase', i, end=': ')
+            print(np.sum(bp_sfc.get_activity('o_copy2', i)))
     except KeyError:
         print('not checked for errors. Run in debug mode with all probes to check for errors.')
 
