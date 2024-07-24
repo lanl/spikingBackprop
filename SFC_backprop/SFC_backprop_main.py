@@ -231,20 +231,22 @@ if do_train and not do_probe_energy:
             if not 0 == (np.sum(bp_sfc.get_activity('h1T', i))):
                 warnings.warn('h1T not silent in inactive phase ' + str(i))
 
+        print('x:')
         for i in range(bp_sfc.num_gate):
             print('phase', i, end=': ')
             print(np.sum(bp_sfc.get_activity('x', i)))
 
-        print('')
-
+        print('h1:')
         for i in range(bp_sfc.num_gate):
             print('phase', i, end=': ')
             print(np.sum(bp_sfc.get_activity('h1', i)))
 
+        print('o:')
         for i in range(bp_sfc.num_gate):
             print('phase', i, end=': ')
             print(np.sum(bp_sfc.get_activity('o', i)))
 
+        print('o_copy2:')
         for i in range(bp_sfc.num_gate):
             print('phase', i, end=': ')
             print(np.sum(bp_sfc.get_activity('o_copy2', i)))
