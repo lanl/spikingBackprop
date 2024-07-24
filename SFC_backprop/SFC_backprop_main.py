@@ -245,11 +245,10 @@ if do_train and not do_probe_energy:
         for i in range(bp_sfc.num_gate):
             print('phase', i, end=': ')
             print(np.sum(bp_sfc.get_activity('o', i)))
-
-        print('o_copy2:')
-        for i in range(bp_sfc.num_gate):
-            print('phase', i, end=': ')
+            print(np.sum(bp_sfc.get_activity('o_copy', i)))
             print(np.sum(bp_sfc.get_activity('o_copy2', i)))
+            print(np.sum(bp_sfc.get_activity('oT-', i)))
+
     except KeyError:
         print('not checked for errors. Run in debug mode with all probes to check for errors.')
 
