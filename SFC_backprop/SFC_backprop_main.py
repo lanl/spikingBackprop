@@ -62,7 +62,7 @@ if do_probe_energy:
 if do_debug:
     probe_mode = 2
     seed = 42
-    params['num_trials'] = 30000
+    params['num_trials'] = 300
 else:
     seed = np.random.randint(0, 10000)  # the seed needs to be different in each epoch
 

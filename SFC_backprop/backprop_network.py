@@ -227,8 +227,8 @@ class BackpropNet(ConnectedGroups):
                                    'oT-', 'h1T', 'c_h1']
             probe_time = 101
             spike_tstart = max(num_gate * (num_trials - probe_time) + 1, 1)
-            weight_dt = num_gate * 1
-            weight_tstart = spike_tstart
+            weight_dt = num_trials * num_gate
+            weight_tstart = num_gate * num_trials - 1
         elif probe_mode == 3:
             # probe only output spikes for all trials (test set run)
             self.monitor_layers = ['o']
