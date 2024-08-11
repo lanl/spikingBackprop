@@ -472,24 +472,27 @@ class BackpropNet(ConnectedGroups):
         print(self.spikeprobes)
         spikes = {sp: self.spikeprobes[sp].data for sp in self.spikeprobes}
         if len(spikes) > 0 and self.probe_mode == 3:
-            spike_tstart = max(self.num_gate * (self.num_trials - 101) + 1, 1)
+            # spike_tstart = max(self.num_gate * (self.num_trials - 101) + 1, 1)
             # t and x usually don't need to be monitored as they are sent to the chip
             try:
                 spikes['t']
             except KeyError:
                 try:
-                    target_spikes = self.target_data[(spike_tstart // self.params['num_gate']):self.params['num_trials']]
+                    # target_spikes = self.target_data[(spike_tstart // self.params['num_gate']):self.params['num_trials']]
+                    target_spikes = self.target_data[0:self.params['num_trials']]
                     target_times, target_indices = np.where(target_spikes)
                     spikes['t'] = np.zeros((self.params['num_populations']['out'],
                                            np.max(target_times * self.params['num_gate'])))
                     spikes['t'][target_indices, target_times * self.params['num_gate']] = 1
                 except Exception as e:
+                    print('could not save target spikes')
                     print(e)
             try:
                 spikes['x']
             except KeyError:
                 try:
-                    in_spikes = self.input_data[(spike_tstart // self.params['num_gate']):self.params['num_trials']]
+                    # in_spikes = self.input_data[(spike_tstart // self.params['num_gate']):self.params['num_trials']]
+                    in_spikes = self.input_data[0:self.params['num_trials']]
                     in_times, in_indices = np.where(in_spikes)
                     spikes['x'] = np.zeros((self.params['num_populations']['in'],
                                            np.max(in_times * self.params['num_gate'])))

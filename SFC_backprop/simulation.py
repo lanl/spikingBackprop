@@ -64,8 +64,8 @@ def inference_from_weights(bp_sfc, labels=None, inp=None):
         W1 = w_final['w1']
         W2 = w_final['w2']
 
-        hid = round(np.dot(in_vec, W1.T[np.newaxis, :, :])[:, 0, :])
-        out_v = np.dot(hid, W2.T[np.newaxis, :, :])[:, 0, :]
+        hid = round(np.dot(in_vec, W1.T[np.newaxis, :, :])[:, 0, :] * 2**bp_sfc.params['weight_exponent'])
+        out_v = np.dot(hid, W2.T[np.newaxis, :, :])[:, 0, :] * 2**bp_sfc.params['weight_exponent']
         out = round(out_v)
 
         cr_calc = np.sum(np.argmax(tgt_vec, axis=1) == np.argmax(out, axis=1)) / len(tgt_vec)
