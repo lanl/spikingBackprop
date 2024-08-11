@@ -469,7 +469,7 @@ class BackpropNet(ConnectedGroups):
         filename_s = os.path.join(".", "saved_spikes", "spikes_" + self.timestamp + str_time + ".npz")
         # filename_s = os.path.join(".", "saved_spikes",'spikes_20210409_1705.npz')
         spikes = {sp: self.spikeprobes[sp].data for sp in self.spikeprobes}
-        if len(spikes) > 0 and self.probe_mode == 3:
+        if len(spikes) > 0 and self.probe_mode in [2,3]:
             spike_tstart = max(self.num_gate * (self.num_trials - 101) + 1, 1)
             try:
                 spikes['t']
