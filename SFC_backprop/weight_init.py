@@ -127,7 +127,7 @@ def weights2loihi(weight_matrix, weight_factor, weight_exponent=0, weight_lim=(-
     weight_matrix_loihi[np.where(weight_matrix_loihi < weight_min)] = weight_min
     weight_matrix_loihi[np.where(weight_matrix_loihi > weight_max)] = weight_max
 
-    weight_matrix_loihi = np.floor(np.abs(weight_matrix_loihi)) * np.sign(weight_matrix_loihi)
+    weight_matrix_loihi = np.floor(np.abs(weight_matrix_loihi)/2) * 2 * np.sign(weight_matrix_loihi)
 
     print('w max: ', np.max(weight_matrix_loihi))
 
