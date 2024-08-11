@@ -76,17 +76,17 @@ class BackpropNet(ConnectedGroups):
         print("generating input data...")
 
         if num_trials <= 60000:
-            input_data, output_data = generate_input_data(num_trials, input_data=self.dataset,
+            input_data, target_data = generate_input_data(num_trials, input_data=self.dataset,
                                                           add_bias=False, threshold=self.input_binary_threshold)
         else:
-            input_data, output_data = generate_input_data(60000, input_data=self.dataset,
+            input_data, target_data = generate_input_data(60000, input_data=self.dataset,
                                                           add_bias=False, threshold=self.input_binary_threshold)
 
         self.input_data = input_data
-        self.output_data = output_data
+        self.target_data = target_data
 
         params['num_populations']['in'] = input_data.shape[1]
-        params['num_populations']['out'] = output_data.shape[1]
+        params['num_populations']['out'] = target_data.shape[1]
 
         net = nx.NxNet()
         ConnectedGroups.__init__(self, net, topology=topology, params=params, verbose=self.verbose)
@@ -326,8 +326,8 @@ class BackpropNet(ConnectedGroups):
         np.savez(filename_p, **energy_timestep_results)
 
     def generate_new_input_data(self, num_trials=60000):
-        self.input_data, self.output_data = generate_input_data(num_trials, input_data=self.dataset, add_bias=False)
-        return self.input_data, self.output_data
+        self.input_data, self.target_data = generate_input_data(num_trials, input_data=self.dataset, add_bias=False)
+        return self.input_data, self.target_data
 
     def add_spikes_to_spikegen(self, chunksize=30000, full_size=60000):
         offset_trials = self.current_offset // self.num_gate
@@ -345,7 +345,7 @@ class BackpropNet(ConnectedGroups):
                                verbose=self.verbose)
         if self.do_train:
             indices_out, times_out = calc_spiketimes_from_input_arr(
-                self.output_data[(offset_trials % full_size):(offset_trials % full_size + chunksize)],
+                self.target_data[(offset_trials % full_size):(offset_trials % full_size + chunksize)],
                 interval=self.num_gate,
                 max_rate=1, num_neurons=1, T=1)
             add_spikes_to_spikegen(self.loihi_groups['in_tgt'], indices=indices_out,
@@ -468,25 +468,34 @@ class BackpropNet(ConnectedGroups):
 
         filename_s = os.path.join(".", "saved_spikes", "spikes_" + self.timestamp + str_time + ".npz")
         # filename_s = os.path.join(".", "saved_spikes",'spikes_20210409_1705.npz')
+
+        print(self.spikeprobes)
         spikes = {sp: self.spikeprobes[sp].data for sp in self.spikeprobes}
         if len(spikes) > 0 and self.probe_mode in [2,3]:
             spike_tstart = max(self.num_gate * (self.num_trials - 101) + 1, 1)
+            # t and x usually don't need to be monitored as they are sent to the chip
             try:
                 spikes['t']
             except KeyError:
-                out_spikes = self.output_data[(spike_tstart // self.params['num_gate']):self.params['num_trials']]
-                out_times, out_indices = np.where(out_spikes)
-                spikes['t'] = np.zeros(self.params['num_populations']['out'],
-                                       np.max(out_times * self.params['num_gate']))
-                spikes['t'][out_indices, out_times * self.params['num_gate']] = 1
+                try:
+                    target_spikes = self.target_data[(spike_tstart // self.params['num_gate']):self.params['num_trials']]
+                    target_times, target_indices = np.where(target_spikes)
+                    spikes['t'] = np.zeros((self.params['num_populations']['out'],
+                                           np.max(target_times * self.params['num_gate'])))
+                    spikes['t'][target_indices, target_times * self.params['num_gate']] = 1
+                except Exception as e:
+                    print(e)
             try:
                 spikes['x']
             except KeyError:
-                in_spikes = self.input_data[(spike_tstart // self.params['num_gate']):self.params['num_trials']]
-                in_times, in_indices = np.where(in_spikes)
-                spikes['x'] = np.zeros(self.params['num_populations']['in'],
-                                       np.max(in_times * self.params['num_gate']))
-                spikes['x'][in_indices, in_times * self.params['num_gate']] = 1
+                try:
+                    in_spikes = self.input_data[(spike_tstart // self.params['num_gate']):self.params['num_trials']]
+                    in_times, in_indices = np.where(in_spikes)
+                    spikes['x'] = np.zeros((self.params['num_populations']['in'],
+                                           np.max(in_times * self.params['num_gate'])))
+                    spikes['x'][in_indices, in_times * self.params['num_gate']] = 1
+                except Exception as e:
+                    print(e)
 
             np.savez(filename_s, **spikes)
             print('spikes saved as', filename_s)
@@ -500,8 +509,8 @@ class BackpropNet(ConnectedGroups):
     def accuracy_from_weights(self):
         data = self.dataset.replace('_test', '')
         print('validation set:')
-        input_data, output_data = generate_input_data(10000, input_data=data, add_bias=False)
-        inference_from_weights(self, labels=output_data, inp=input_data)
+        input_data, target_data = generate_input_data(10000, input_data=data, add_bias=False)
+        inference_from_weights(self, labels=target_data, inp=input_data)
         print('train set:')
-        input_data, output_data = generate_input_data(20000, input_data=data, add_bias=False)
-        inference_from_weights(self, labels=output_data, inp=input_data)
+        input_data, target_data = generate_input_data(20000, input_data=data, add_bias=False)
+        inference_from_weights(self, labels=target_data, inp=input_data)
