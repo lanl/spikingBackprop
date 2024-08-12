@@ -511,9 +511,12 @@ class BackpropNet(ConnectedGroups):
 
     def accuracy_from_weights(self):
         data = self.dataset.replace('_test', '')
-        print('validation set:')
+        data += '_test'
+        print('test set:')
         input_data, target_data = generate_input_data(10000, input_data=data, add_bias=False)
         inference_from_weights(self, labels=target_data, inp=input_data)
+
+        data = self.dataset.replace('_test', '')
         print('train set:')
-        input_data, target_data = generate_input_data(20000, input_data=data, add_bias=False)
+        input_data, target_data = generate_input_data(60000, input_data=data, add_bias=False)
         inference_from_weights(self, labels=target_data, inp=input_data)
