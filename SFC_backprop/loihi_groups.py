@@ -152,8 +152,8 @@ def create_loihi_synapse(net, source, target, conn_parameters, mask, name, verbo
     weight_r = np.asarray(np.sign(conn_parameters['weight']), dtype=int) * \
                np.asarray(np.abs(conn_parameters['weight']) + 0.5, dtype=int)
     if not np.sum(weight_r - conn_parameters['weight']) == 0:
-        print('should be:', weight_r)
-        print('is:', conn_parameters['weight'])
+        print('is:', weight_r)
+        print('should be:', conn_parameters['weight'])
         warnings.warn("rounding error for weight init of " + name)
 
     # weight_r = np.asarray(np.sign(conn_parameters['weight']), dtype=int) * \
@@ -180,9 +180,15 @@ def create_loihi_synapse(net, source, target, conn_parameters, mask, name, verbo
     if verbose:
         print(weight_matrix)
     # print(mask)
-    conn_group = pre_compartments.connect(post_compartments, prototype=conn_proto,
-                                          weight=weight_matrix,
-                                          connectionMask=mask)
+
+    if numTagBits:
+        conn_group = pre_compartments.connect(post_compartments, prototype=conn_proto,
+                                              weight=weight_matrix, tag=weight_matrix,
+                                              connectionMask=mask)
+    else:
+        conn_group = pre_compartments.connect(post_compartments, prototype=conn_proto,
+                                              weight=weight_matrix,
+                                              connectionMask=mask)
 
     if verbose:
         try:
