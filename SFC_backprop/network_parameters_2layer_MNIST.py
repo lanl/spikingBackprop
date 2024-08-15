@@ -34,6 +34,9 @@ params['T'] = 1
 params['sfc_threshold'] = 1024 * 2**params['weight_exponent']
 
 bias = - 8192 * 64
+# In weights, this is 8192, as the weights are multiplied by 64
+# the sum of inputs should never exceed this value, otherwise the neuron will spike even if it is in an inactive phase
+# the sum of input should also never exceed -2**23+bias, as there will be a negative overflow that also leads to a spike
 
 params['x1TimeConstant'] = 1
 params['y1TimeConstant'] = 1
@@ -133,7 +136,7 @@ params['weight_1ge'] = -bias // 64 + params['sfc_threshold'] + 2 ** exp1ge
 params['weight_i'] = -params['sfc_threshold']
 params['weight_e'] = params['sfc_threshold']
 params['weight_g'] = -bias // 64 + binary_threshold
-# - 2  # Noise goes all the way to the threshold, so here we set the gate weight
+
 params['weight_gp05'] = -bias // 64
 params['weight_gm05'] = binary_threshold  # +4 # - 2
 
