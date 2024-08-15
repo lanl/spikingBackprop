@@ -128,12 +128,12 @@ def create_conn_prototype(weight_matrix, weight_exponent=None, verbose=True, **k
         kwargs['numDelayBits'] = 2
 
     try:
-        numDelayBits = kwargs['numWeightBits']
+        numWeightBits = kwargs['numWeightBits']
     except KeyError:
         kwargs['numWeightBits'] = 8
 
     try:
-        numDelayBits = kwargs['numTagBits']
+        numTagBits = kwargs['numTagBits']
     except KeyError:
         kwargs['numTagBits'] = 1
 

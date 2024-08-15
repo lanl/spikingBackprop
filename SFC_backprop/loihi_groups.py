@@ -103,6 +103,12 @@ def create_loihi_synapse(net, source, target, conn_parameters, mask, name, verbo
             lr_t = conn_parameters['lr_t']
         except KeyError:
             lr_t = None
+
+        if lr_t:
+            numTagBits = 8
+        else:
+            numTagBits = None
+
         lr = net.createLearningRule(dw=conn_parameters['lr_w'],
                                     dt=lr_t,
                                     x1Impulse=conn_parameters['x1Impulse'],
@@ -166,6 +172,7 @@ def create_loihi_synapse(net, source, target, conn_parameters, mask, name, verbo
         weight_exponent=weight_exponent,
         enableLearning=enableLearning, learningRule=learningRule,
         disableDelay=disableDelay, delay=delay, numDelayBits=numDelayBits,
+        numTagBits=numTagBits,
         verbose=verbose
     )
 
