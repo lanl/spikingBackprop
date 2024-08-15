@@ -20,18 +20,18 @@ from loihi_tools.weight_tools import calculate_mant_exp
 params = {}
 
 params['num_neurons'] = 1
-params['num_trials'] = 60000 * 2  # we can do 2 epochs in one run, to save setup time
+params['num_trials'] = 60000 #* 2  # we can do 2 epochs in one run, to save setup time
 # (new shuffled training data is generated for each epoch)
 
 params['num_populations'] = {}
-params['num_populations']['hid'] = 400  # 400 #400  # 400
+params['num_populations']['hid'] = 200  # 400 #400  # 400
 params['num_populations']['gat'] = 1
 
 params['weight_exponent'] = 0
 
 params['T'] = 1
 
-params['sfc_threshold'] = 1024  # 2 * 256 #2 * 256  # 4 * 256
+params['sfc_threshold'] = 1024 * 2**params['weight_exponent']
 
 bias = - 8192 * 64
 
@@ -46,7 +46,7 @@ sfc_neuron_params = {
     'tau_v': 1,
     'tau_i': 1,
     'threshold': params['sfc_threshold'],
-    'refractory': 0,
+    'refractory': 2,
     'i_const': bias,
     'enableNoise': 0,
     'enableLearning': 0,
@@ -56,6 +56,19 @@ sfc_neuron_params = {
     'end_core': 95
 }
 sfc_learn_neuron_params = {
+    'tau_v': 1,
+    'tau_i': 1,
+    'threshold': params['sfc_threshold'],
+    'refractory': 2,
+    'i_const': bias,
+    'enableNoise': 0,
+    'enableLearning': 1,
+    'num_neurons': params['num_neurons'],
+    'neuron_creator': create_loihi_neuron,
+    'start_core': 2,
+    'end_core': 80
+}
+sfc_learn_neuron_params_nr = {
     'tau_v': 1,
     'tau_i': 1,
     'threshold': params['sfc_threshold'],
@@ -97,6 +110,7 @@ input_neuron_params = {
 params['neuron_types'] = {
     'n_sfc': sfc_neuron_params,
     'n_sfl': sfc_learn_neuron_params,
+    'n_sfl_nr': sfc_learn_neuron_params_nr,
     # 'n_ref': sfc_ref_neuron_params,
     'n_gat': gating_neuron_params,
     'n_rew': reward_neuron_params,
@@ -112,7 +126,7 @@ assert binary_threshold == params['sfc_threshold'] / 2
 # params['weight_p'] = params['sfc_threshold']  # This is the max weight
 
 w1e, exp1e = calculate_mant_exp(binary_threshold, verbose=0)
-params['weight_1e'] = binary_threshold + 2 ** exp1e  # This is done to avoid rounding errors
+params['weight_1e'] = binary_threshold + 8 # 2 ** exp1e  # This is done to avoid rounding errors
 w1ge, exp1ge = calculate_mant_exp(params['sfc_threshold'] - bias // 64, verbose=0)
 params['weight_1ge'] = -bias // 64 + params['sfc_threshold'] + 2 ** exp1ge
 
@@ -123,7 +137,7 @@ params['weight_g'] = -bias // 64 + binary_threshold
 params['weight_gp05'] = -bias // 64
 params['weight_gm05'] = binary_threshold  # +4 # - 2
 
-params['weight_gi'] = -254 * 2 ** 6  # TODO
+params['weight_gi'] = -254 * 2 ** 5  # TODO
 
 syn_delay = 0
 
