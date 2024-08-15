@@ -100,7 +100,7 @@ connected_pairs = [
     ('g03', 't', 'g'),
 
     ('g04', 'h1T', 'gi'),
-
+    ('g04', 'oT-', 'gi'),
     # 05 W2 pot
     ('g05', 'h1', 'g'),
     ('g05', 'h1T', 'g'),
@@ -114,9 +114,9 @@ connected_pairs = [
     ('g06', 'h1T', 'gm05'),
     ('g06', 'h1T', 'g'),
 
-    ('g06', 'h1', 'gi'),
-    ('g06', 'h1_copy', 'gi'),
-    ('g06', 'h1_copy2', 'gi'),
+    #('g06', 'h1', 'gi'),
+    #('g06', 'h1_copy', 'gi'),
+    #('g06', 'h1_copy2', 'gi'),
     ('g06', 'o', 'gi'),
     ('g06', 'o_copy', 'gi'),
     ('g06', 'o_copy2', 'gi'),
@@ -124,9 +124,9 @@ connected_pairs = [
     # 07 W1 pot
     ('g07', 'x', 'g'),
 
-    ('g08', 'o', 'gi'),
-    ('g08', 'o_copy', 'gi'),
-    ('g08', 'o_copy2', 'gi'),
+    #('g08', 'o', 'gi'),
+    #('g08', 'o_copy', 'gi'),
+    #('g08', 'o_copy2', 'gi'),
     ('g08', 'h1', 'gi'),
     ('g08', 'h1_copy', 'gi'),
     ('g08', 'h1_copy2', 'gi'),
@@ -144,9 +144,9 @@ connected_pairs = [
     ('g10', 'h1T', 'gm05'),
     ('g10', 'h1T', 'g'),
 
-    ('g10', 'h1', 'gi'),
-    ('g10', 'h1_copy', 'gi'),
-    ('g10', 'h1_copy2', 'gi'),
+    #('g10', 'h1', 'gi'),
+    #('g10', 'h1_copy', 'gi'),
+    #('g10', 'h1_copy2', 'gi'),
     ('g10', 'o', 'gi'),
     ('g10', 'o_copy', 'gi'),
     ('g10', 'o_copy2', 'gi'),
@@ -157,9 +157,17 @@ connected_pairs = [
     ('g00', 'o', 'gi'),
     ('g00', 'o_copy', 'gi'),
     ('g00', 'o_copy2', 'gi'),
-    ('g00', 'h1', 'gi'),
-    ('g00', 'h1_copy', 'gi'),
-    ('g00', 'h1_copy2', 'gi'),
+    #('g00', 'h1', 'gi'),
+    #('g00', 'h1_copy', 'gi'),
+    #('g00', 'h1_copy2', 'gi'),
+
+    #('g00', 'o', 'gi2'),
+    #('g00', 'o_copy', 'gi2'),
+    #('g00', 'o_copy2', 'gi2'),
+    #('g00', 'h1', 'gi2'),
+    #('g00', 'h1_copy', 'gi2'),
+    #('g00', 'h1_copy2', 'gi2'),
+
 
     # connected_pairs_cond
     ('c_h1', 'h1', 'g1'),
@@ -202,7 +210,7 @@ layers = {
     't': ('out', 'n_sfc'),
     'd-': ('out', 'n_sfc'), 'd+': ('out', 'n_sfc'),
 
-    'h1T': ('hid', 'n_sfl'),
+    'h1T': ('hid', 'n_sfl_nr'),
     'oT-': ('out', 'n_sfl'),
 
     'input': ('in', 'n_inp'), 'in_tgt': ('out', 'n_inp'), 'in_g': ('gat', 'n_inp'),

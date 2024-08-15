@@ -145,6 +145,8 @@ def create_loihi_synapse(net, source, target, conn_parameters, mask, name, verbo
     weight_r = np.asarray(np.sign(conn_parameters['weight']), dtype=int) * \
                np.asarray(np.abs(conn_parameters['weight']) + 0.5, dtype=int)
     if not np.sum(weight_r - conn_parameters['weight']) == 0:
+        print('should be:', weight_r)
+        print('is:', conn_parameters['weight'])
         warnings.warn("rounding error for weight init of " + name)
 
     # weight_r = np.asarray(np.sign(conn_parameters['weight']), dtype=int) * \

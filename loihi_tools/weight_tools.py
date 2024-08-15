@@ -1,10 +1,9 @@
 import numpy as np
+import warnings
 
 try:
     import nxsdk.api.n2a as nx
 except:
-    import warnings
-
     warnings.warn('nxsdk not found')
 
 
