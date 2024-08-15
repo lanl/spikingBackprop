@@ -106,6 +106,7 @@ def create_loihi_synapse(net, source, target, conn_parameters, mask, name, verbo
 
         if lr_t:
             numTagBits = 8
+            print("numTagBits set to 8")
         else:
             numTagBits = 0
 
