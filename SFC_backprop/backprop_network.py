@@ -7,6 +7,7 @@ Created by : Alpha Renner (alpren@ini.uzh.ch)
 import os
 import re
 import time
+import warnings
 
 import numpy as np
 import nxsdk.api.n2a as nx
@@ -214,8 +215,8 @@ class BackpropNet(ConnectedGroups):
         elif probe_mode == 1:
             # probe only weight (loop) every 30000 (for training)
             self.monitor_weights = [w for w in self.loihi_connections_plastic if ('_p' in w) and not ('copy' in w)]
-            weight_dt = num_gate * 30000
-            weight_tstart = num_gate * 30000 - 1
+            weight_dt = (num_trials * num_gate) // 2
+            weight_tstart = (num_trials * num_gate) // 2 - 1
             spike_tstart = 2 ** 22
         elif probe_mode == 2:
             # probe <100 trials with all layers and all weights (debug)
@@ -440,7 +441,12 @@ class BackpropNet(ConnectedGroups):
                 else:
                     raise NotImplementedError
 
-                self.w_final[wgt] = self.weights[wgt][:, :, -1]
+                try:
+                    self.w_final[wgt] = self.weights[wgt][:, :, -1]
+                except IndexError as e:
+                    warnings.warn(e)
+                    print('you might have forgotten to monitor weights or set weight_dt or weight_tstart incorrectly')
+                    self.w_final[wgt] = self.weights[wgt]
             except KeyError as e:
                 print(e)
 
