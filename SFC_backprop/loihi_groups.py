@@ -107,7 +107,7 @@ def create_loihi_synapse(net, source, target, conn_parameters, mask, name, verbo
         if lr_t:
             numTagBits = 8
         else:
-            numTagBits = None
+            numTagBits = 0
 
         lr = net.createLearningRule(dw=conn_parameters['lr_w'],
                                     dt=lr_t,
