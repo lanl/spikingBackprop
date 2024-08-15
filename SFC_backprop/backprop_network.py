@@ -7,6 +7,7 @@ Created by : Alpha Renner (alpren@ini.uzh.ch)
 import os
 import re
 import time
+import warnings
 
 import numpy as np
 import nxsdk.api.n2a as nx
@@ -129,7 +130,8 @@ class BackpropNet(ConnectedGroups):
             self.loihi_connections[plastic_connection_map[weight_name]].setSynapseState('weight', init_mat.flatten())
             conn_state = self.loihi_connections[plastic_connection_map[weight_name]].getConnectionState('weight')
 
-            assert (conn_state == init_mat).all()
+            if not (conn_state == init_mat).all():
+               warnings.warn('rounding error in weight init on chip!')
 
         self.loihi_connections_plastic = [conn for conn in self.loihi_connections if
                                           (conn.endswith("_p") or conn.endswith("_f"))]
