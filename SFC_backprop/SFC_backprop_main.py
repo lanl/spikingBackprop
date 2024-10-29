@@ -7,6 +7,7 @@ Created by : Alpha Renner (alpren@ini.uzh.ch)
 import os
 import sys
 import warnings
+import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -24,6 +25,13 @@ from SFC_backprop.backprop_network import BackpropNet
 # lsusb
 # sudo usbreset 04b4:6572
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--weight_mode", default="rand_He", help="Set the weight mode, either rand_He to initialize randomly or restore to restore from the most recently saved weights")
+args = parser.parse_args()
+
+print(f"Weight mode: {args.weight_mode}")
+
+
 try:
     os.environ['SLURM']
     params['on_kapohobay'] = False
@@ -35,7 +43,7 @@ except:
     params['on_kapohobay'] = True
 
 weight_file = None
-weight_mode = 'rand_He' #'rand_He'  # 'restore'
+weight_mode = args.weight_mode 
 
 do_probe_energy = False
 do_train = True
