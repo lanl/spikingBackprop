@@ -24,7 +24,7 @@ params['num_trials'] = 60000 #* 2  # we can do 2 epochs in one run, to save setu
 # (new shuffled training data is generated for each epoch)
 
 params['num_populations'] = {}
-params['num_populations']['hid'] = 200  # 400 #400  # 400
+params['num_populations']['hid'] = 400
 params['num_populations']['gat'] = 1
 
 params['weight_exponent'] = 0
@@ -158,8 +158,8 @@ params['connection_types'] = {
                      'x1Impulse': params['x1Impulse'],
                      'y1Impulse': params['y1Impulse'],
                      'r1Impulse': params['r1Impulse'],
-                     'lr_w': 'y0*x0*r1*4 - y0*x0*2',  # TODO
-                     # 'lr_t': 'x0*r1*0'
+                     'lr_w': 'y0*x0*r1*4 - y0*x0*2',
+                     #'lr_t': ''
                      }
           },
     'f': {'pop_conn_type': 'a:a',

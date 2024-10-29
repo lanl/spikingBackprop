@@ -35,16 +35,16 @@ except:
     params['on_kapohobay'] = True
 
 weight_file = None
-weight_mode = 'restore'  # 'rand_He'  # 'rand_He'  # 'restore'
+weight_mode = 'rand_He' #'rand_He'  # 'restore'
 
 do_probe_energy = False
 do_train = True
 do_plots = False
-do_debug = True
-# dataset = 'MNIST20'
+do_debug = False  
+dataset = 'MNIST20'
 # dataset = 'MNIST10'
 # dataset = 'MNIST28'
-dataset = 'FMNIST28'
+# dataset = 'FMNIST28'
 
 if do_train:
     params['dataset'] = dataset
