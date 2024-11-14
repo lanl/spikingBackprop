@@ -90,7 +90,7 @@ def weight_init(params, mode='rand', file=None):
         init_weight_matrix1 = weights2loihi(weight_matrix=init_weight_matrix1,
                                             weight_factor=params['sfc_threshold'],
                                             weight_exponent=params['weight_exponent'], weight_lim=(-240, 240))
-        # the weight limitss (just for init) are set a bit below w is possible (254) since it is better if the weights
+        # the weight limits (just for init) are set a bit below w is possible (254) as it is better if the weights
         # never reach the max due to the asymmetry that can arise as the negative weight can go lower (-256) than
         # the positive (+254)
 
@@ -113,8 +113,8 @@ def weight_init(params, mode='rand', file=None):
 
 
 def weights2loihi(weight_matrix, weight_factor, weight_exponent=0, weight_lim=(-254, 254)):
-    weight_min = weight_lim[0] * 2 ** weight_exponent  # Have to be the same since there is a negative version
-    weight_max = weight_lim[1] * 2 ** weight_exponent
+    weight_min = weight_lim[0]  # Should be the same
+    weight_max = weight_lim[1]
 
     weight_factor_exp = weight_factor * 2 ** -weight_exponent
 
@@ -127,10 +127,9 @@ def weights2loihi(weight_matrix, weight_factor, weight_exponent=0, weight_lim=(-
     weight_matrix_loihi[np.where(weight_matrix_loihi < weight_min)] = weight_min
     weight_matrix_loihi[np.where(weight_matrix_loihi > weight_max)] = weight_max
 
-    weight_matrix_loihi = np.floor(np.abs(weight_matrix_loihi) / (2 * 2 ** weight_exponent)) * \
-                          (2 * 2 ** weight_exponent) * np.sign(weight_matrix_loihi)
+    weight_matrix_loihi = np.floor(np.abs(weight_matrix_loihi)/2) * 2 * np.sign(weight_matrix_loihi)
 
-    np.max(weight_matrix_loihi)
+    print('w max: ', np.max(weight_matrix_loihi))
 
     if np.sum(weight_matrix * weight_factor_exp != weight_matrix_loihi) != 0:
         warnings.warn("rounding of init matrix")

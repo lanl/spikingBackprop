@@ -1,25 +1,31 @@
-# sBP
-Spiking backprop on Intel's research chip Loihi with gated synfire chain.
+# nBP
+Implementation of backprop on Intel's neuromorphic research chip Loihi using gated synfire chains.
 
 This is the code used in the following publication:
-Renner, A., Sheldon, F., Zlotnik, A., Tao, L., & Sornborger, A. (2021). 
-The Backpropagation Algorithm Implemented on Spiking Neuromorphic Hardware. 
-arXiv preprint arXiv:2106.07030.
-https://arxiv.org/abs/2106.07030
+
+Renner, A., Sheldon, F., Zlotnik, A., Tao, L., & Sornborger, A.
+The backpropagation algorithm implemented on spiking neuromorphic hardware.
+Nature Communications 15, 9691 (2024).  
+https://doi.org/10.1038/s41467-024-53827-9
+
 
 ## Getting started
 Please install nxsdk according to Intel's instructions.
+Please find more information on how to access the Loihi hardware and software here: 
+https://intel-ncl.atlassian.net/wiki/spaces/INRC/pages/1810432001/Access+Intel+Loihi+Hardware
+(last checked 2024/11)
+
 For downloading and preparing the dataset, we also require the following packages:
 mnist, scikit-image
 
 The main file to run the code is SFC_backprop/SFC_backprop_main.py.
 
-This code is written to allow rapid prototyping without writing code.
+This code is written to allow rapid prototyping of gated synfire chains without writing code.
 
 
 
 ## Structure
-In this section, the backend of the network is explained. You will not need this if
+In this section, the configuration of the network is explained. You will not need this if
 you just want to use the 3-layer network. However, you need it, if you want to change 
 the network topology.
 
@@ -42,14 +48,14 @@ In the layer mapping, each layer gets assigned a type.
               'o': ('out', 'n_sfc')}
 
 The first element of the tuple determines the layer type (e.g. how many neurons) and the second
-element determines the neuron type (e.g. the specific neuron parameters).
+element determines the neuron type (e.g. the specific neuron model and parameters).
 
 Here, we are providing 2 pre-defined topologies from the paper:
 A training network and an inference network.
 
-Here, is the full topology of the 3-layer inference network:
+This is the full topology of the 3-layer inference network:
 
-    connected_pairs_inf = [
+    connected_pairs_inference = [
         ('x', 'h1', 'f'),  # W1 forward
         ('h1', 'o', 'f'),  # W2 forward
     
@@ -65,7 +71,7 @@ Here, is the full topology of the 3-layer inference network:
         ('g02', 'g03', '1ge'),
         ('g03', 'g00', '1ge')
     ]
-    layers_inf = {
+    layers_inference = {
         'input': ('in', 'n_inp'),
         'in_g': ('gat', 'n_inp'),
         'g00': ('gat', 'n_gat'),

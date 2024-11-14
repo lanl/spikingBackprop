@@ -103,6 +103,13 @@ def create_loihi_synapse(net, source, target, conn_parameters, mask, name, verbo
             lr_t = conn_parameters['lr_t']
         except KeyError:
             lr_t = None
+
+        if lr_t:
+            numTagBits = 8
+            print("numTagBits set to 8")
+        else:
+            numTagBits = 0
+
         lr = net.createLearningRule(dw=conn_parameters['lr_w'],
                                     dt=lr_t,
                                     x1Impulse=conn_parameters['x1Impulse'],
@@ -145,6 +152,8 @@ def create_loihi_synapse(net, source, target, conn_parameters, mask, name, verbo
     weight_r = np.asarray(np.sign(conn_parameters['weight']), dtype=int) * \
                np.asarray(np.abs(conn_parameters['weight']) + 0.5, dtype=int)
     if not np.sum(weight_r - conn_parameters['weight']) == 0:
+        print('is:', weight_r)
+        print('should be:', conn_parameters['weight'])
         warnings.warn("rounding error for weight init of " + name)
 
     # weight_r = np.asarray(np.sign(conn_parameters['weight']), dtype=int) * \
@@ -164,15 +173,22 @@ def create_loihi_synapse(net, source, target, conn_parameters, mask, name, verbo
         weight_exponent=weight_exponent,
         enableLearning=enableLearning, learningRule=learningRule,
         disableDelay=disableDelay, delay=delay, numDelayBits=numDelayBits,
+        numTagBits=numTagBits,
         verbose=verbose
     )
 
     if verbose:
         print(weight_matrix)
     # print(mask)
-    conn_group = pre_compartments.connect(post_compartments, prototype=conn_proto,
-                                          weight=weight_matrix,
-                                          connectionMask=mask)
+
+    if numTagBits:
+        conn_group = pre_compartments.connect(post_compartments, prototype=conn_proto,
+                                              weight=weight_matrix, tag=weight_matrix,
+                                              connectionMask=mask)
+    else:
+        conn_group = pre_compartments.connect(post_compartments, prototype=conn_proto,
+                                              weight=weight_matrix,
+                                              connectionMask=mask)
 
     if verbose:
         try:

@@ -6,6 +6,8 @@ Created by : Alpha Renner (alpren@ini.uzh.ch)
 """
 import os
 import sys
+import warnings
+import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,45 +19,63 @@ try:
 except:
     pass
 from SFC_backprop.network_parameters_2layer_MNIST import params
-from SFC_backprop.sfc_plot_tools import validate_inference_activity
 from SFC_backprop.backprop_network import BackpropNet
 
 # to reset Kapohobay run something like:
 # lsusb
 # sudo usbreset 04b4:6572
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--weight_mode", default="rand_He", help="Set the weight mode, either rand_He to initialize randomly or restore to restore from the most recently saved weights")
+args = parser.parse_args()
+
+print(f"Weight mode: {args.weight_mode}")
+
+
 try:
     os.environ['SLURM']
     params['on_kapohobay'] = False
+    os.environ['PARTITION'] = "nahuku32_2h"
+    os.environ['BOARD'] = "ncl-ext-ghrd-01"
 except:
     print('SLURM not set. Running on Kapohobay!')
     os.environ['KAPOHOBAY'] = '1'
     params['on_kapohobay'] = True
 
 weight_file = None
-weight_mode = 'rand_He'  # 'rand_He'  # 'restore'  # 'rand_He'
+weight_mode = args.weight_mode 
 
 do_probe_energy = False
 do_train = True
 do_plots = False
-# dataset = 'MNIST20'
-dataset = 'MNIST10'
+do_debug = False  
+dataset = 'MNIST20'
+# dataset = 'MNIST10'
+# dataset = 'MNIST28'
+# dataset = 'FMNIST28'
 
 if do_train:
     params['dataset'] = dataset
     probe_mode = 1
 else:
-    params['num_trials'] = 10000  # TODO
+    params['num_trials'] = 10000
     # params['num_trials'] = 1000
     params['dataset'] = dataset + '_test'
     probe_mode = 3
 
 if do_probe_energy:
     probe_mode = 0
+    params['num_trials'] = 10000
 
-# seed = 42
-seed = np.random.randint(0, 10000)
+if do_debug:
+    probe_mode = 2
+    seed = 42
+    params['num_trials'] = 300
+else:
+    seed = np.random.randint(0, 10000)  # the seed needs to be different in each epoch
+
 np.random.seed(seed)
+print('seed:', seed)
 
 params['seed'] = seed
 params['do_train'] = do_train
@@ -67,12 +87,12 @@ bp_sfc = BackpropNet(params, debug=0)
 bp_sfc.setup_probes(probe_mode=probe_mode)
 
 bp_sfc.run()
-bp_sfc.save_results()
-
-bp_sfc.validate_inference_activity_calc()
+if not do_probe_energy:  # when energy is probed, all other probes are disabled
+    bp_sfc.save_results()
+    bp_sfc.accuracy_from_weights()
 
 # input_data, output_data = generate_input_data(10000, input_data=dataset, add_bias=False)
-validate_inference_activity(bp_sfc, labels=bp_sfc.output_data, do_plots=False)
+# validate_inference_activity(bp_sfc, labels=bp_sfc.output_data, do_plots=False)
 
 # bp_sfc.load_spikes('./saved_spikes/spikes_20210405_1611.npz')
 
@@ -189,50 +209,96 @@ if do_plots:
     matplotlib.rcParams['pgf.texsystem'] = 'pdflatex'
     plt.savefig('./rasterplot_annotated.svg')
 
-if do_train:
+if do_train and not do_probe_energy:
     try:
         print(np.sum(bp_sfc.get_activity('h1', 2)))
         print(np.sum(bp_sfc.get_activity('o', 3)))
-        for i in [1, 4, 6, 8, 10, 0]:
-            print('phase:', i, end=' ')
-            assert 0 == (np.sum(bp_sfc.get_activity('h1', i)))
-            assert 0 == (np.sum(bp_sfc.get_activity('h1_copy', i)))
-            assert 0 == (np.sum(bp_sfc.get_activity('h1_copy2', i)))
-            assert 0 == (np.sum(bp_sfc.get_activity('o', i)))
-            assert 0 == (np.sum(bp_sfc.get_activity('o_copy', i)))
-            assert 0 == (np.sum(bp_sfc.get_activity('o_copy2', i)))
-            assert 0 == (np.sum(bp_sfc.get_activity('o', i)))
+        for i in [0, 1, 3, 4, 6, 8, 10]:
+            print('phase', i, end=': ')
+            if not 0 == (np.sum(bp_sfc.get_activity('h1', i))):
+                warnings.warn('h1 not silent in inactive phase ' + str(i))
+            if not 0 == (np.sum(bp_sfc.get_activity('h1_copy', i))):
+                warnings.warn('h1_copy not silent in inactive phase ' + str(i))
+            if not 0 == (np.sum(bp_sfc.get_activity('h1_copy2', i))):
+                warnings.warn('h1_copy2 not silent in inactive phase ' + str(i))
+        print('')
 
-            print('OK, silent')
+        for i in [0, 1, 2, 4, 6, 7, 8, 10, 11]:
+            print('phase', i, end=': ')
+            if not 0 == (np.sum(bp_sfc.get_activity('o', i))):
+                warnings.warn('o not silent in inactive phase ' + str(i))
+            if not 0 == (np.sum(bp_sfc.get_activity('o_copy', i))):
+                warnings.warn('o_copy not silent in inactive phase ' + str(i))
+            if not 0 == (np.sum(bp_sfc.get_activity('o_copy2', i))):
+                warnings.warn('o_copy2 not silent in inactive phase ' + str(i))
+            if not 0 == (np.sum(bp_sfc.get_activity('o', i))):
+                warnings.warn('o not silent in inactive phase ' + str(i))
+        print('')
+
         for i in [0, 1, 2, 3, 4, 7, 8, 11]:
-            assert 0 == (np.sum(bp_sfc.get_activity('h1T', i)))
+            if not 0 == (np.sum(bp_sfc.get_activity('h1T', i))):
+                warnings.warn('h1T not silent in inactive phase ' + str(i))
 
+        print('x:')
         for i in range(bp_sfc.num_gate):
-            print('phase:', i, end=' ')
+            print('phase', i, end=': ')
             print(np.sum(bp_sfc.get_activity('x', i)))
+
+        print('h1:')
+        for i in range(bp_sfc.num_gate):
+            print('phase', i, end=': ')
+            print(np.sum(bp_sfc.get_activity('h1', i)))
+
+        print('d:')
+        for i in range(bp_sfc.num_gate):
+            print('phase', i, end=': ')
+            print(np.sum(bp_sfc.get_activity('d-', i)))
+            print(np.sum(bp_sfc.get_activity('d+', i)))
+
+        print('o:')
+        for i in range(bp_sfc.num_gate):
+            print('phase', i, end=': ')
+            print(np.sum(bp_sfc.get_activity('o', i)), end=': ')
+            print(np.sum(bp_sfc.get_activity('o_copy', i)), end=': ')
+            print(np.sum(bp_sfc.get_activity('o_copy2', i)), end=': ')
+            print(np.sum(bp_sfc.get_activity('oT-', i)))
+
     except KeyError:
-        pass
+        print('not checked for errors. Run in debug mode with all probes to check for errors.')
 
     # bp_sfc.get_activity('x', 1)[:100]==bp_sfc.get_activity('x', 11)
     try:
-        assert (w_final['w1'] == w_final['w1_copy1']).all()
-        assert (w_final['w1'] == w_final['w1_copy2']).all()
-    except KeyError:
-        pass
+        if not (w_final['w1'] == w_final['w1_copy1']).all():
+            warnings.warn('w1 not equal to w1_copy1')
+        if not (w_final['w1'] == w_final['w1_copy2']).all():
+            warnings.warn('w1 not equal to w1_copy2')
+    except KeyError as e:
+        print(e)
 
     try:
-        assert (w_final['w1_copy1'] == w_final['w1_copy2']).all()
-        assert (w_final['w2'] == w_final['w2_copy1']).all()
-        assert (w_final['w2'] == w_final['w2_copy2']).all()
-    except KeyError:
-        pass
+        if not (w_final['w1_copy1'] == w_final['w1_copy2']).all():
+            warnings.warn('w1_copy1 not equal to w1_copy2')
+        if not (w_final['w2'] == w_final['w2_copy1']).all():
+            warnings.warn('w2 not equal to w2_copy1')
+        if not (w_final['w2'] == w_final['w2_copy2']).all():
+            warnings.warn('w2 not equal to w2_copy2')
+    except KeyError as e:
+        print(e)
 
-    assert (w_final['w2'].T == w_final['w2Tp']).all(), np.sum(np.abs(w_final['w2'].T - w_final['w2Tp']))
-    print((w_final['w2'].T == -w_final['w2Tm']).all(), np.sum(np.abs(w_final['w2'].T + w_final['w2Tm'])))
-    print((w_final['w2Tp'] == -w_final['w2Tm']).all(), np.sum(np.abs(w_final['w2Tm'] + w_final['w2Tp'])))
+    if not (w_final['w2'].T == w_final['w2Tp']).all():
+        warnings.warn('w2 not equal to w2Tp')
+    print(np.sum(np.abs(w_final['w2'].T - w_final['w2Tp'])))
 
-    w_final['w2Tm'][np.where(w_final['w2'].T != -w_final['w2Tm'])]
-    w_final['w2'].T[np.where(w_final['w2'].T != -w_final['w2Tm'])]
+    if not (w_final['w2'].T == -w_final['w2Tm']).all():
+        warnings.warn('w2 not equal to -w2Tm')
+    print(np.sum(np.abs(w_final['w2'].T + w_final['w2Tm'])))
 
-    w_final['w2Tp'][np.where(w_final['w2'].T != w_final['w2Tp'])]
-    w_final['w2'].T[np.where(w_final['w2'].T != w_final['w2Tp'])]
+    if not (w_final['w2Tp'] == -w_final['w2Tm']).all():
+        warnings.warn('w2Tp not equal to -w2Tm')
+    print(np.sum(np.abs(w_final['w2Tm'] + w_final['w2Tp'])))
+
+    print(w_final['w2Tm'][np.where(w_final['w2'].T != -w_final['w2Tm'])])
+    print(w_final['w2'].T[np.where(w_final['w2'].T != -w_final['w2Tm'])])
+
+    print(w_final['w2Tp'][np.where(w_final['w2'].T != w_final['w2Tp'])])
+    print(w_final['w2'].T[np.where(w_final['w2'].T != w_final['w2Tp'])])
